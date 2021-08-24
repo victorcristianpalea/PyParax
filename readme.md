@@ -29,8 +29,21 @@ $ python3
 ```
 The version should appear above the prompt inside the Python console as follows:
 ```
-COMPLETEAZA DIN UBUNTU
+Python 3.8.5 (default, Jul 28 2020, 12:59:40)
+[GCC 9.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
 ```
+Install, if needed, pip3 using
+```
+$ sudo apt install python3-pip
+```
+If it is not found type
+```
+sudo apt update
+```
+and then try again.
+
 Install the required packages using:
 ```
 $ pip3 install numpy scipy matplotlib mayavi
