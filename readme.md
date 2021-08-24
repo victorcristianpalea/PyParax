@@ -1,6 +1,6 @@
 # PyParax
 
-Numerical solver for wave propagation in the paraxial approximation
+Numerical solver the paraxial wave equation.
 
 ## Getting Started
 
