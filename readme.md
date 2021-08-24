@@ -4,7 +4,7 @@ Numerical solver for wave propagation in the paraxial approximation
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. The software is supported on Windows 10 and Ubuntu v19.10 or greater operating systems.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. The software is supported on Windows 10 and Ubuntu v19.10.
 
 ### Prerequisites (Windows 10)
 
@@ -35,26 +35,35 @@ Install the required packages using:
 ```
 $ pip3 install numpy scipy matplotlib mayavi
 ```
-### Installing
-Go to the folder that contains the package files and run the command:
+### Installing (Windows 10)
+If using Anaconda, open Anaconda Prompt and go to the folder that contains the package files. Check the command for calling a python interpreter e.g. 
 ```
-$ python3 setup.py install
+c:\users\your_name> python
 ```
-At the end there should appear the following message:
+and check the version that is returned after the interpreter is loaded.
 ```
-Installed c:\users\victor\anaconda3\lib\site-packages\pyparax-0.0.1-py3.7.egg
-Processing dependencies for pyparax==0.0.1
-Finished processing dependencies for pyparax==0.0.1 
+Python 3.8.8 (default, Apr 13 2021, 15:08:03) [MSC v.1916 64 bit (AMD64)] :: Anaconda, Inc. on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
 ```
-The installation should be carried out using Python 3.X so based on the labeling used to call the python3 command the installation procedure might require using
+If the version is the one that you have in the Anaconda environment, then run the command:
 ```
 $ python setup.py install
 ```
-Once installed, the package can be tested by importing it into a Python 3 console as follows:
+After installing the last lines of output text should be:
 ```
-$ python3
-> import pyparax
+Installed c:\users\your_name\anaconda3\lib\site-packages\pyparax-0.0.1-py3.8.egg
+Processing dependencies for pyparax==5.0
+Finished processing dependencies for pyparax==5.0 
 ```
+Once installed, the package can be tested by starting a Python interpreter and typing
+```
+>>> import pyparax
+```
+If no error is returned, PyParax should be up and running.
+### Installing (Ubuntu)
+Same steps as for Windows 10 but the installation is done using the Terminal.
+
 ## Running the tests
 
 Inside the package folder there is a folder labeled *examples*, inside of which there is a collection of files each of which containing functions that can be used to either test the functionality, and showcase some basic usage of the package.
