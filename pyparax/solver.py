@@ -83,7 +83,7 @@ class numeric_fourier_solver_1d:
                 #Check if print_progress = True and print the iteration variable if so 
                 if print_progress == True:
                     print("Step " + str(i) + "/" + str(steps))
-                f[i,:] = fft_f0 * external_imports.np.exp(-1j/2/k*freqs*i*dz)
+                f[i,:] = fft_f0 * external_imports.np.exp(-1j/2/k*freqs*(i+1)*dz)
             #Return from frequency space by inverse FFT.
                 if fft_output == False:
                     f[i,:] = external_imports.np.fft.ifftshift(external_imports.np.fft.ifft(external_imports.np.fft.ifftshift(f[i,:])))
@@ -157,6 +157,7 @@ class numeric_fourier_solver_2d:
             fft_f0 = external_imports.np.copy(f0)
         else:
             fft_f0 = external_imports.np.fft.fftshift(external_imports.np.fft.fft2(external_imports.np.fft.fftshift(f0)))
+            
         #Compute the frequencies associated with the transvers spatial grid for both axis
         freqs_x = external_imports.np.fft.fftshift(external_imports.np.fft.fftfreq(size_x, dx))
         freqs_y = external_imports.np.fft.fftshift(external_imports.np.fft.fftfreq(size_y, dy))
@@ -183,10 +184,10 @@ class numeric_fourier_solver_2d:
                 #Check if print_progress = True and print the iteration variable if so 
                 if print_progress == True:
                     print("Step " + str(i) + "/" + str(steps))
-                f[i,:, :] = fft_f0 * external_imports.np.exp(-1j/2/k*freqs*i*dz)
+                f[i,:,:] = fft_f0 * external_imports.np.exp(-1j/2/k*freqs*(i+1)*dz)
                 #Return from frequency space by inverse FFT.
                 if fft_output == False:
-                    f[i,:, :] = external_imports.np.fft.ifftshift(external_imports.np.fft.ifft2(external_imports.np.fft.ifftshift(f[i,:, :])))
+                    f[i,:,:] = external_imports.np.fft.ifftshift(external_imports.np.fft.ifft2(external_imports.np.fft.ifftshift(f[i,:,:])))
         else:
             print('Wrong output_full parameter. Options: True / False')
         #Return solution

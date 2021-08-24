@@ -847,7 +847,7 @@ class mask_generator_1d:
         
         return mask
     
-    def check_output_for_mask(system, f_in, f_out, output = True, use_prints = True):
+    def check_output_for_mask(system, f_in, f_out, output = True, use_prints = True, ploting = False):
         """
         Computes the beam profile through an optical system given by
             
@@ -878,9 +878,11 @@ class mask_generator_1d:
         f = experimental_simulator_1d.propagate(f_in, system, forward = True, norm = False, output_full=False)
         
         #Plot the computed and desired amplitude profiles for qualitative comparison
-        external_imports.plt.figure()
-        external_imports.plt.plot(external_imports.np.abs(f_out)**2)
-        external_imports.plt.plot(external_imports.np.abs(f)**2)
+        if ploting == True:
+            external_imports.plt.figure()
+            external_imports.plt.plot(external_imports.np.abs(f_out)**2)
+            external_imports.plt.plot(external_imports.np.abs(f)**2)
+            external_imports.plt.title(r'$f_{out} vs. f_{retrieved}$')
         
         #Normalize the 2 outputs
         f_norm = f/external_imports.np.sqrt(external_imports.np.sum(external_imports.np.abs(f)**2))
@@ -1256,7 +1258,7 @@ class experimental_simulator_2d:
                             print('Propagate for '+str(system[i])+' units [mm]')
                         
                         #Check for non-zero length of free space domain
-                        if i != 0:
+                        if system[i] != 0:
                             
                             #Propagate according to all the input parameters. Use system_warnings for the fft_input/fft_output varibles
                             f = internal_imports.s.numeric_fourier_solver_2d.linear(f0, wavelength=internal_imports.p.wavelength, n0 = internal_imports.p.n0, print_progress=use_prints, steps = int(system[i]/internal_imports.p.dz), output_full = True, forward = False, fft_input=(system_warnings[i][0]=='fourier'), fft_output=(system_warnings[i][1]=='fourier'))
@@ -1334,39 +1336,14 @@ class experimental_simulator_2d:
             #Plot the beam profile at the last position on the propagation axis
             if print_output == True:
                 
-                #Normalize the beam profile if norm == True. Maximum amplitude is 1
-                if norm == True:
-                    
-                    #Copy the beam profile in order to not change the original values
-                    f_temp = external_imports.np.copy(f_total)
-                    
-                    #Normalize the copied values
-                    for i in range(external_imports.np.shape(f_temp)[0]):
-                        f_temp[i,:]=f_temp[i,:]/external_imports.np.max(external_imports.np.abs(f_temp[i,:]))
-                    
-                    #Plot the normalized values using surface plots
-                    try:
-                        mayavi_mlab.clf()
-                        mayavi_mlab.contour3d(external_imports.np.abs(f_temp)**2, transparent = True, contours = 10)
-                    except:
-                        import mayavi.mlab as mayavi_mlab
-                        mayavi_mlab.clf()
-                        mayavi_mlab.contour3d(external_imports.np.abs(f_temp)**2, transparent = True, contours = 10)
-                    
-                    del f_temp
+                #Plot the normalized values using surface plots
+                try:
+                    import mayavi.mlab as mayavi_mlab
+                    mayavi_mlab.clf()
+                    mayavi_mlab.contour3d(external_imports.np.abs(f_total)**2, transparent = True, contours = 10)
+                except:
+                    plotters.full_beam_plot_1d(f_total[:,:,int(external_imports.np.shape(f_total)[2]/2.)], system, forward = forward, norm = norm)
                 
-                else:
-                    
-                    #Plot the original values using surface plots
-                    try:
-                        mayavi_mlab.clf()
-                        mayavi_mlab.contour3d(external_imports.np.abs(f_total)**2, transparent = True, contours = 10)
-                    except:
-                        import mayavi.mlab as mayavi_mlab
-                        mayavi_mlab.clf()
-                        mayavi_mlab.contour3d(external_imports.np.abs(f_total)**2, transparent = True, contours = 10)
-                    
-                    
             return f_total
         else:
             if forward == True:
@@ -1549,9 +1526,7 @@ class experimental_simulator_2d:
                 
             #Plot the beam profile
             if print_output == True:
-                external_imports.plt.imshow(external_imports.np.abs(f_final)**2)
-                external_imports.plt.xlabel(r"$x/\Delta x, \Delta x = $" + str(internal_imports.p.dx) + str(internal_imports.p.unit))
-                external_imports.plt.ylabel(r"$y/\Delta y, \Delta y = $" + str(internal_imports.p.dy) + str(internal_imports.p.unit))
+                plotters.full_beam_plot_1d(f_total[:,:,int(external_imports.np.shape(f_total)[2]/2.)], system, forward = forward, norm = norm)
             
         return f_final
         
@@ -1706,7 +1681,7 @@ class mask_generator_2d:
         
         return mask
             
-    def check_output_for_mask(system, f_in, f_out, output = True, use_prints = True):
+    def check_output_for_mask(system, f_in, f_out, output = True, use_prints = True, ploting = False):
         """
         Computes the beam profile through an optical system given by
             
@@ -1739,9 +1714,11 @@ class mask_generator_2d:
         f = experimental_simulator_2d.propagate(f_in, system, forward = True, norm = False, output_full=False)
         
         #Plot the computed and desired amplitude profiles for qualitative comparison
-        external_imports.plt.figure()
-        external_imports.plt.imshow(external_imports.np.abs(f_out)**2)
-        external_imports.plt.imshow(external_imports.np.abs(f)**2)
+        if ploting == True:
+            external_imports.plt.figure()
+            external_imports.plt.imshow(external_imports.np.abs(f_out)**2)
+            external_imports.plt.figure()
+            external_imports.plt.imshow(external_imports.np.abs(f)**2)
         
         #Normalize the 2 outputs
         f_norm = f/external_imports.np.sqrt(external_imports.np.sum(external_imports.np.abs(f)**2))
@@ -1928,13 +1905,14 @@ class computing_system_estimators:
             return number_of_bytes/2**30
         
 class plotters:
-    def full_beam_plot_1d(f, system, forward = True, x_number_of_ticks = None, y_number_of_ticks = None, norm = False, which = 'abs'):
+    def full_beam_plot_1d(f, system, coords = ['z','x'], forward = True, x_number_of_ticks = None, y_number_of_ticks = None, norm = False, which = 'abs'):
         """
         Plots the amplitude of a computed 1-dimensional beam profile using the physical spatial scaling specified in numeric_parameters.py.
         
         Inputs:
             f = 2-dimensional arraay; complex - The computed beam profile.
             system = list - The optical system.
+            coords = list - The meaning of the axes. Usually the solver outputs an array with the order of axis ['z', 'x'].
             x_number_of_ticks = int - The number of major ticks on the X axis.
             y_number_of_ticks = int - The number of major ticks on the Y axis.
             norm = boolean - If true, the amplitude profile is normalized such that the maximum value becomes 1 at every step on the propagation axis. 
@@ -1945,6 +1923,7 @@ class plotters:
         Outputs:
             None
         """
+        
         import matplotlib.ticker as mpl_t
         #Create the figure
         fig = external_imports.plt.figure()
@@ -1954,12 +1933,30 @@ class plotters:
         if x_number_of_ticks is None:
             x_number_of_ticks = 20
         if y_number_of_ticks is None:
-            y_number_of_ticks = 20
+            y_number_of_ticks = 20   
+        
+        if coords == ['z', 'x']:
+            f = external_imports.np.transpose(f)
             
         #Normalize the amplitude profile at each step on the propagation axis
-        for i in range(external_imports.np.shape(f)[0]):
-            f[i,:] = f[i,:]/external_imports.np.max(external_imports.np.abs(f[i,:]))
-        
+        for i in range(external_imports.np.shape(f)[1]):
+            f[:,i] = f[:,i]/external_imports.np.max(external_imports.np.abs(f[:,i]))
+            
+        if forward == False:
+            system = system[::-1]
+            
+        distance_pixels = 0
+        for i in system:
+            if type(i) == int or type(i) == float:
+                distance_pixels += i/internal_imports.p.dz
+            elif type(i) == list:
+                if i[0] == 'l':
+                    f[:,int(distance_pixels-2):int(distance_pixels+3)] = external_imports.np.max(external_imports.np.abs(f))
+                if i[0] == 'mp':
+                    f[::2,int(distance_pixels-2):int(distance_pixels+3)] = external_imports.np.max(external_imports.np.abs(f))
+                if i[0] == 'ma':
+                    f[::4,int(distance_pixels-2):int(distance_pixels+3)] = external_imports.np.max(external_imports.np.abs(f))
+            
         #Plot the desired profile
         if which == 'abs':
             ax.imshow(external_imports.np.abs(f))
@@ -1968,13 +1965,13 @@ class plotters:
         elif which == 'both':
             ax.imshow(external_imports.np.abs(f)*external_imports.np.angle(f))
         else:
-            print("Select between 'abs', 'phase' or 'both' for parameter: which")    
+            print("Select between 'abs', 'phase' or 'both' for parameter: which")        
         
         #Calculate the physical transverse domain
         x_init = internal_imports.ini.standard_initial_conditions.spatial_domain_generator(dim = 1)[0]
         
         #Compute distance between 2 neighboring ticks in pixels on each axis based on the size of f, x_number_of_ticks, and y_number_of_ticks
-        y_size, x_size = external_imports.np.shape(f)
+        x_size, y_size = external_imports.np.shape(f)
         
         x_tick_size = round(x_size / x_number_of_ticks)
         y_tick_size = round(y_size / y_number_of_ticks)
@@ -2003,11 +2000,14 @@ class plotters:
         x_labels = mpl_t.FixedFormatter(x_labels)
         y_labels = mpl_t.FixedFormatter(y_labels)
         
-        ax.xaxis.set_major_formatter(x_labels)
-        ax.yaxis.set_major_formatter(y_labels)
-        ax.xaxis.set_major_locator(x_positions)
-        ax.yaxis.set_major_locator(y_positions)
+        ax.xaxis.set_major_formatter(y_labels)
+        ax.yaxis.set_major_formatter(x_labels)
+        ax.xaxis.set_major_locator(y_positions)
+        ax.yaxis.set_major_locator(x_positions)
         
         #Label the axis.
-        ax.set_xlabel(r"$x[$"+internal_imports.p.unit+r"$]$")
-        ax.set_ylabel(r"$z[$"+internal_imports.p.unit+r"$]$")
+        ax.set_xlabel(r"$z[$"+internal_imports.p.unit+r"$]$")
+        ax.set_ylabel(r"$x[$"+internal_imports.p.unit+r"$]$")
+        
+        ax.tick_params(axis = 'x', labelrotation = 90)
+                    
